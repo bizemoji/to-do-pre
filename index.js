@@ -10,6 +10,7 @@ let items = [
 const listElement = document.querySelector(".to-do__list");
 const formElement = document.querySelector(".to-do__form");
 const inputElement = document.querySelector(".to-do__input");
+const templateElement = document.getElementById("to-do__item-template");
 
 function loadTasks() {
 	const saved = localStorage.getItem("tasks");
@@ -20,8 +21,7 @@ function loadTasks() {
 }
 
 function createItem(item) {
-	const template = document.getElementById("to-do__item-template");
-	const clone = template.content.querySelector(".to-do__item").cloneNode(true);
+	const clone = templateElement.content.querySelector(".to-do__item").cloneNode(true);
 	const textElement = clone.querySelector(".to-do__item-text");
 	const deleteButton = clone.querySelector(".to-do__item-button_type_delete");
 	const duplicateButton = clone.querySelector(".to-do__item-button_type_duplicate");
@@ -29,23 +29,20 @@ function createItem(item) {
 
 	textElement.textContent = item;
 
-	// Delete
 	deleteButton.addEventListener("click", function () {
 		clone.remove();
-		const items = getTasksFromDOM();
-		saveTasks(items);
+		const currentTasks = getTasksFromDOM();
+		saveTasks(currentTasks);
 	});
 
-	// Duplicate
 	duplicateButton.addEventListener("click", function () {
 		const itemName = textElement.textContent;
 		const newItem = createItem(itemName);
 		listElement.prepend(newItem);
-		const items = getTasksFromDOM();
-		saveTasks(items);
+		const currentTasks = getTasksFromDOM();
+		saveTasks(currentTasks);
 	});
 
-	// Edit
 	editButton.addEventListener("click", function () {
 		textElement.setAttribute("contenteditable", "true");
 		textElement.focus();
@@ -53,8 +50,8 @@ function createItem(item) {
 
 	textElement.addEventListener("blur", function () {
 		textElement.setAttribute("contenteditable", "false");
-		const items = getTasksFromDOM();
-		saveTasks(items);
+		const currentTasks = getTasksFromDOM();
+		saveTasks(currentTasks);
 	});
 
 	return clone;
@@ -73,13 +70,11 @@ function saveTasks(tasks) {
 	localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-// Init
 items = loadTasks();
 items.forEach(function (item) {
 	listElement.append(createItem(item));
 });
 
-// Form submit
 formElement.addEventListener("submit", function (e) {
 	e.preventDefault();
 	const taskText = inputElement.value;
